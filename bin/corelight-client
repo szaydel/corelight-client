@@ -208,8 +208,8 @@ if bearer_token_is_explicit:
 elif password_is_explicit and username_is_explicit:
     auth_schemes_to_use += [AUTH_TYPE_PASSWORD]
 else:
-    # 3. Cached bearer tokens
-    if args.bearer_token and AUTH_TYPE_BEARER_TOKEN:
+    # 3. Cached bearer tokens as long as a user isn't specified or the user matches the cached token
+    if args.bearer_token and ((not args.user) or (cached_creds[client.configuration.CRED_USER_OFFSET] == args.user)):
         auth_schemes_to_use += [AUTH_TYPE_BEARER_TOKEN]
     # 4. Cached usernames and passwords.
     if args.user and args.password:
