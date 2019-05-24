@@ -214,7 +214,7 @@ else:
     if args.bearer_token and ((not args.user) or (cached_creds[client.configuration.CRED_USER_OFFSET] == args.user)):
         auth_schemes_to_use += [AUTH_TYPE_BEARER_TOKEN]
     # 4. Cached usernames and passwords.
-    if args.user and args.password:
+    if args.user and args.password and (cached_creds[client.configuration.CRED_USER_OFFSET] == args.user):
         auth_schemes_to_use += [AUTH_TYPE_PASSWORD]
     # 5. Password interactive (multiple tries)
     if can_use_password_interactive:
@@ -247,6 +247,12 @@ for i in range(len(auth_schemes_to_use)):
         # prompt the user now.
         if AUTH_TYPE_PASSWORD_INTERACTIVE == auth_method_used:
             args.bearer_token = None
+            if not password_is_explicit:
+                args.password = None
+
+            if not username_is_explicit:
+                args.user = None
+
             new_credential_argv = client.util.promptUserCredentials(args)
         elif AUTH_TYPE_PASSWORD == auth_method_used:
             args.bearer_token = None
