@@ -210,11 +210,11 @@ class Session:
             if vals and "settings" in vals and "password.cache.disabled" in vals["settings"] and vals["settings"]["password.cache.disabled"]:
                 self._args.no_password_save = True
 
-            if vals and vals["settings"] and vals["settings"]["2fa.enabled"]:
-                if not vals["id"]:
-                    raise SessionError("No user id has been provided by the server.")
+            if vals and "2fa.required" in vals and vals["2fa.required"]:
+                if "2fa.should_enroll" in vals and vals["2fa.should_enroll"]:
+                    raise SessionError("The user needs to enroll an authenticator app before using corleight-client.")
 
-                verifyUrl = client.util.appendUrl(self._args.auth_base_url, "/users/{}/2fa/verify".format(vals["id"]))
+                verifyUrl = client.util.appendUrl(self._args.auth_base_url, "/current/2fa/verify")
 
                 if mfaToken and mfaToken is "-" and (not self._args.noblock):
                     mfaToken = client.util.getInput("Verification Code", password=True)
