@@ -1,15 +1,14 @@
 
-1.5.1 | 2019-05-29 11:27:59 -0700
+1.5.4 | 2019-06-05 15:09:49 -0700
 
-  * Release 1.5.1.
-
-
-1.5.1 | 2019-05-24 20:19:42 +0000
-
-  * Release 1.5.1.
+  * Less pedantic messages indicating what user credentials are being stored and used.
 
 
-1.5.2 | 2019-05-24 15:49:00 -0700
+1.5.3 | 2019-05-30 02:27:43 +0000
+
+  * Improved informational messages indicating what user credentials are being stored and used.
+
+1.5.2 | 2019-05-24 20:19:42 +0000
 
   * Fixed credential caching so that fleet bearer tokens are tied to a user.
 
