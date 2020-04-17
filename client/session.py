@@ -373,7 +373,31 @@ class Session:
             info = response.headers.get("X-INFO-MESSAGE", None)
             if info:
                 client.util.infoMessage(info)
+            
+            # 2fa is enabled on the sensor hence we will retry with 2fa code
+            # username password fields are constructed based on a agreed format 
+            # username 2fa|<authtype>|<username>
+            # password <passcode>|<password> 
+            info2faheader = response.headers.get("WWW-Authenticate", None)
+            if info2faheader and info2faheader.startswith("BasicWith2fa"):
+                 if not self._args.mfa and not self._mfa_bearer_token:
+                    self._args.mfa = client.util.getInput("Verification Code", password=True)
+                 if self._args.user.startswith("local|") or self._args.user.startswith("ldap|"):
+                      self._args.user = '2fa|' + self._args.user
+                 else:
+                      self._args.user = '2fa|local|' + self._args.user
+                 self._args.password = self._args.mfa + '|' + self._args.password
+                 auth = (self._args.user, self._args.password)
+                 if auth:
+                     req = requests.Request(url=url, headers=self._requestHeaders(), auth=auth, **kwargs)
+                 else:
+                     req = requests.Request(url=url, headers=self._requestHeaders(), **kwargs)
 
+                 prepared = Session._RequestsSession.prepare_request(req)
+                 response = Session._RequestsSession.send(prepared)
+
+       
+            
         except requests.exceptions.SSLError as e:
             u = urllib.parse.urlparse(url)
             raise SessionError("cannot connect to Corelight device at {}. {}".format(u.netloc, e))
