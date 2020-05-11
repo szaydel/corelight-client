@@ -24,6 +24,7 @@ _CorelightRoot = os.path.join(os.path.dirname(__file__), "certs/corelight.pem")
 # Maximum API  version we support. If server sends a more recent one, this
 # client needs to be updated.
 _Version = 1
+mfaToken = None
 
 requests.packages.urllib3.disable_warnings()
 
@@ -185,7 +186,7 @@ class Session:
         """
         Performs fleet authentication
         """
-
+        global mfaToken
         if self._args.auth_base_url:
             fullUrl = client.util.appendUrl(self._args.auth_base_url, "/login")
         else:
@@ -333,6 +334,7 @@ class Session:
         corresponding ``requests`` methods.
         """
         kwargs["method"] = kwargs.get("method", "GET")
+        global mfaToken
 
         try:
             debug_level = kwargs["debug_level"]
@@ -344,7 +346,6 @@ class Session:
             auth = (self._args.user, self._args.password)
         else:
             auth = None
-
         if auth:
             req = requests.Request(url=url, headers=self._requestHeaders(), auth=auth, **kwargs)
         else:
@@ -377,17 +378,20 @@ class Session:
             # 2fa is enabled on the sensor hence we will retry with 2fa code
             # username password fields are constructed based on a agreed format 
             # username 2fa|<authtype>|<username>
-            # password <passcode>|<password> 
+            # password <passcode>|<password>                         
             info2faheader = response.headers.get("WWW-Authenticate", None)
             if info2faheader and info2faheader.startswith("BasicWith2fa"):
-                 if not self._args.mfa and not self._mfa_bearer_token:
-                    self._args.mfa = client.util.getInput("Verification Code", password=True)
+                 if not mfaToken and not self._mfa_bearer_token:
+                    mfaToken = client.util.getInput("Verification Code", password=True)
+
                  if self._args.user.startswith("local|") or self._args.user.startswith("ldap|"):
                       self._args.user = '2fa|' + self._args.user
                  else:
                       self._args.user = '2fa|local|' + self._args.user
-                 self._args.password = self._args.mfa + '|' + self._args.password
+
+                 self._args.password = mfaToken + '|' + self._args.password
                  auth = (self._args.user, self._args.password)
+
                  if auth:
                      req = requests.Request(url=url, headers=self._requestHeaders(), auth=auth, **kwargs)
                  else:
@@ -396,8 +400,6 @@ class Session:
                  prepared = Session._RequestsSession.prepare_request(req)
                  response = Session._RequestsSession.send(prepared)
 
-       
-            
         except requests.exceptions.SSLError as e:
             u = urllib.parse.urlparse(url)
             raise SessionError("cannot connect to Corelight device at {}. {}".format(u.netloc, e))
