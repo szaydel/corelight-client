@@ -397,8 +397,8 @@ class Session:
                  response = Session._RequestsSession.send(prepared)
                  # Get the bearer token which will be valid for the entire session 
                  info2faheader = response.headers.get("Authorization", None)
-                 if info2faheader and info2faheader.startswith("SessionID="):
-                     start = 'SessionID='
+                 if info2faheader and info2faheader.startswith("Bearer"):
+                     start = 'Bearer '
                      sessionID = (info2faheader.split(start,1))[1]
                      #print("Bearer token", sessionID)
                      self._mfa_bearer_token = sessionID
