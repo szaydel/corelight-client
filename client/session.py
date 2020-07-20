@@ -364,13 +364,14 @@ class Session:
             info = response.headers.get("X-INFO-MESSAGE", None)
             if info:
                 client.util.infoMessage(info)
-            
-            # 2fa is enabled on the sensor hence we will retry with 2fa code
-            # username password fields are constructed based on a agreed format 
-            # username 2fa|<authtype>|<username>
-            # password <passcode>|<password>                         
+                       
             info2faheader = response.headers.get("WWW-Authenticate", None)
+
             if info2faheader and info2faheader.startswith("BasicWith2fa"):
+                 # 2fa is enabled on the sensor hence we will retry with 2fa code
+                 # username password fields are constructed based on a agreed format 
+                 # username 2fa|<authtype>|<username>
+                 # password <passcode>|<password>
                  mfaToken = client.util.getInput("Verification Code", password=True)
                  # username has no authenticator type provided 
                  if self._args.user.find("|") == -1:
