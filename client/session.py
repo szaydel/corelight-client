@@ -405,13 +405,6 @@ class Session:
 
                  else:
                      raise SessionError("cannot get 2fa session from device")
-
-                 newHeaders = self._requestHeaders().copy()
-                 newHeaders["Authorization"] = 'Bearer ' + self._args.bearer_token
-
-                 req = requests.Request(url=url, headers=newHeaders, **kwargs)
-                 prepared = Session._RequestsSession.prepare_request(req)
-                 response = Session._RequestsSession.send(prepared)
  
         except requests.exceptions.SSLError as e:
             u = urllib.parse.urlparse(url)
