@@ -224,7 +224,7 @@ class Session:
                     if "error" in data and "message" in data['error']:
                         raise SessionError(str(data['error']['message']))
                     else:
-                        raise SessionError("cannot get 2fa session from device")
+                        raise SessionError("Cannot get 2fa session from device")
 
                 vals = res.json()
 
